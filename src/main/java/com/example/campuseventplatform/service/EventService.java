@@ -5,6 +5,7 @@ import com.example.campuseventplatform.model.EventStatus;
 import com.example.campuseventplatform.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -29,4 +30,27 @@ public class EventService {
         return eventRepository.findById(id).orElse(null);
     }
 
+    public Event submitEvent(Long id) {
+        Event event = eventRepository.findById(id).orElseThrow();
+        event.setStatus(EventStatus.SUBMITTED);
+        return eventRepository.save(event);
+    }
+
+    public Event facultyApprove(Long id) {
+        Event event = eventRepository.findById(id).orElseThrow();
+        event.setStatus(EventStatus.FACULTY_APPROVED);
+        return eventRepository.save(event);
+    }
+
+    public Event adminApprove(Long id) {
+        Event event = eventRepository.findById(id).orElseThrow();
+        event.setStatus(EventStatus.ADMIN_APPROVED);
+        return eventRepository.save(event);
+    }
+
+    public Event publishEvent(Long id) {
+        Event event = eventRepository.findById(id).orElseThrow();
+        event.setStatus(EventStatus.PUBLISHED);
+        return eventRepository.save(event);
+    }
 }
