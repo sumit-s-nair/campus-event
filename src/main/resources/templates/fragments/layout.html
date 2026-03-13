@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- ============ HEAD FRAGMENT ============ -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Campus Event Platform</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<!-- ============ NAVBAR FRAGMENT ============ -->
+<nav th:fragment="navbar" class="navbar">
+    <a th:href="@{/dashboard}" class="navbar-brand">Smart Campus Event Platform</a>
+    <div class="navbar-right" th:if="${session.user != null}">
+        <ul class="navbar-nav">
+            <li><a th:href="@{/dashboard}">Dashboard</a></li>
+            <li th:if="${session.user.role.name() == 'ORGANIZER'}">
+                <a th:href="@{/events/new}">New Event</a>
+            </li>
+            <li th:if="${session.user.role.name() == 'ADMIN'}">
+                <a th:href="@{/reports}">Reports</a>
+            </li>
+        </ul>
+        <div class="navbar-divider"></div>
+        <div class="navbar-user">
+            <span class="user-name" th:text="${session.user.name}">User</span>
+            <span class="role-badge" th:text="${session.user.role}">ROLE</span>
+            <a th:href="@{/logout}" class="btn-logout">Sign Out</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ============ FOOTER FRAGMENT ============ -->
+<footer th:fragment="footer" class="footer">
+    Smart Campus Event &amp; Resource Coordination Platform
+</footer>
+
+</body>
+</html>

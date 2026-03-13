@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Create Event')}"></head>
+<body class="page-wrapper">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Create New Event</h1>
+        <p>Submit a new event proposal for review and approval.</p>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="card" style="max-width: 640px;">
+        <form th:action="@{/events/new}" method="post">
+            <div class="form-group">
+                <label class="form-label" for="title">Event Title</label>
+                <input type="text" id="title" name="title" class="form-input"
+                       placeholder="Enter the event title" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">Description</label>
+                <textarea id="description" name="description" class="form-input"
+                          placeholder="Describe the event, its objectives, and expected activities" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="date">Event Date</label>
+                <input type="date" id="date" name="date" class="form-input" required>
+            </div>
+
+            <div class="flex gap-1">
+                <button type="submit" class="btn btn-primary">Create Event</button>
+                <a th:href="@{/dashboard/organizer}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

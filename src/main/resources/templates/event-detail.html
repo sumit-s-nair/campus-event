@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Event Details')}"></head>
+<body class="page-wrapper">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container">
+    <!-- Back link -->
+    <div class="mb-2">
+        <a th:href="@{/dashboard}" class="text-sm">&larr; Back to Dashboard</a>
+    </div>
+
+    <!-- Event Header -->
+    <div class="detail-header">
+        <div class="flex gap-1" style="align-items: center; flex-wrap: wrap;">
+            <h1 th:text="${event.title}">Event Title</h1>
+            <span class="badge"
+                  th:classappend="'badge-' + ${#strings.replace(#strings.toLowerCase(event.status.name()), '_', '-')}"
+                  th:text="${#strings.replace(event.status.name(), '_', ' ')}">STATUS</span>
+        </div>
+        <div class="detail-meta">
+            <span>Date: <strong th:text="${event.date}">2026-01-01</strong></span>
+            <span th:if="${event.organizer != null}">Organized by: <strong th:text="${event.organizer.name}">Organizer</strong></span>
+        </div>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Event Description -->
+    <div class="card mb-2">
+        <div class="card-header">
+            <h2>Description</h2>
+        </div>
+        <p class="detail-description" th:text="${event.description}">Event description goes here.</p>
+    </div>
+
+    <!-- Actions based on role and status -->
+    <div class="detail-actions"
+         th:if="${
+            (session.user.role.name() == 'ORGANIZER' and event.status.name() == 'DRAFT') or
+            (session.user.role.name() == 'FACULTY' and event.status.name() == 'SUBMITTED') or
+            (session.user.role.name() == 'ADMIN' and (event.status.name() == 'FACULTY_APPROVED' or event.status.name() == 'ADMIN_APPROVED')) or
+            (session.user.role.name() == 'STUDENT' and event.status.name() == 'PUBLISHED' and !isRegistered) or
+            (session.user.role.name() == 'SPONSOR' and (event.status.name() == 'PUBLISHED' or event.status.name() == 'ADMIN_APPROVED'))
+         }">
+
+        <!-- Organizer: Submit Draft -->
+        <th:block th:if="${session.user.role.name() == 'ORGANIZER' and event.status.name() == 'DRAFT'}">
+            <form th:action="@{'/events/' + ${event.id} + '/submit'}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-primary">Submit for Approval</button>
+            </form>
+        </th:block>
+
+        <!-- Faculty: Approve / Reject -->
+        <th:block th:if="${session.user.role.name() == 'FACULTY' and event.status.name() == 'SUBMITTED'}">
+            <form th:action="@{'/events/' + ${event.id} + '/faculty-approve'}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-success">Approve</button>
+            </form>
+            <form th:action="@{'/events/' + ${event.id} + '/reject'}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </th:block>
+
+        <!-- Admin: Approve / Publish / Reject -->
+        <th:block th:if="${session.user.role.name() == 'ADMIN' and event.status.name() == 'FACULTY_APPROVED'}">
+            <form th:action="@{'/events/' + ${event.id} + '/admin-approve'}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-success">Admin Approve</button>
+            </form>
+            <form th:action="@{'/events/' + ${event.id} + '/reject'}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </th:block>
+        <th:block th:if="${session.user.role.name() == 'ADMIN' and event.status.name() == 'ADMIN_APPROVED'}">
+            <form th:action="@{'/events/' + ${event.id} + '/publish'}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-primary">Publish Event</button>
+            </form>
+        </th:block>
+
+        <!-- Student: Register -->
+        <th:block th:if="${session.user.role.name() == 'STUDENT' and event.status.name() == 'PUBLISHED' and !isRegistered}">
+            <form th:action="@{'/events/' + ${event.id} + '/register'}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-primary">Register for This Event</button>
+            </form>
+        </th:block>
+
+        <!-- Sponsor: Sponsor -->
+        <th:block th:if="${session.user.role.name() == 'SPONSOR' and (event.status.name() == 'PUBLISHED' or event.status.name() == 'ADMIN_APPROVED')}">
+            <form th:action="@{'/events/' + ${event.id} + '/sponsor'}" method="post" class="sponsor-inline">
+                <input type="number" name="amount" class="form-input" placeholder="Amount (Rs.)"
+                       min="1" step="0.01" required style="width: 150px;">
+                <button type="submit" class="btn btn-primary">Sponsor This Event</button>
+            </form>
+        </th:block>
+    </div>
+
+    <!-- Student registered badge -->
+    <div th:if="${session.user.role.name() == 'STUDENT' and isRegistered}" class="alert alert-success">
+        You are registered for this event.
+    </div>
+
+    <!-- Participants -->
+    <div class="section" th:if="${!participations.isEmpty()}">
+        <div class="card">
+            <div class="card-header">
+                <h2>Registered Participants</h2>
+                <span class="text-muted text-sm" th:text="${participations.size()} + ' registered'">0 registered</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p, iter : ${participations}">
+                            <td th:text="${iter.count}">1</td>
+                            <td th:text="${p.student.name}">Student</td>
+                            <td th:text="${p.student.email}">email@campus.edu</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sponsorships -->
+    <div class="section" th:if="${!sponsorships.isEmpty()}">
+        <div class="card">
+            <div class="card-header">
+                <h2>Sponsorships</h2>
+                <span class="text-muted text-sm" th:text="${sponsorships.size()} + ' sponsors'">0 sponsors</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sponsor</th>
+                            <th class="text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="s : ${sponsorships}">
+                            <td th:text="${s.sponsor.name}">Sponsor</td>
+                            <td class="text-right" th:text="'Rs. ' + ${#numbers.formatDecimal(s.amount, 1, 2)}">Rs. 0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
