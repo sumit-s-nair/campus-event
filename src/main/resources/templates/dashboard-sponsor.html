@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sponsor Dashboard')}"></head>
+<body class="page-wrapper">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Sponsor Dashboard</h1>
+        <p>Welcome, <span th:text="${session.user.name}">Sponsor</span>. Browse events and manage your sponsorships.</p>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- My Sponsorships -->
+    <div class="section" th:if="${!sponsorships.isEmpty()}">
+        <div class="section-header">
+            <h2>My Sponsorships</h2>
+        </div>
+        <div class="card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date</th>
+                            <th class="text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="s : ${sponsorships}">
+                            <td>
+                                <a th:href="@{'/events/' + ${s.event.id} + '/detail'}"
+                                   th:text="${s.event.title}">Event</a>
+                            </td>
+                            <td th:text="${s.event.date}">2026-01-01</td>
+                            <td class="text-right" th:text="'Rs. ' + ${#numbers.formatDecimal(s.amount, 1, 2)}">Rs. 0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Available for Sponsorship -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Events Available for Sponsorship</h2>
+        </div>
+
+        <div th:if="${events.isEmpty()}" class="empty-state">
+            <p>No events are currently available for sponsorship.</p>
+        </div>
+
+        <div class="events-grid" th:if="${!events.isEmpty()}">
+            <div class="event-card" th:each="event : ${events}">
+                <div class="event-card-body">
+                    <h3 class="event-card-title">
+                        <a th:href="@{'/events/' + ${event.id} + '/detail'}"
+                           th:text="${event.title}">Event Title</a>
+                    </h3>
+                    <p class="event-card-desc" th:text="${event.description}">Description</p>
+                    <div class="event-card-meta">
+                        <span th:text="${event.date}">2026-01-01</span>
+                        <span class="badge"
+                              th:classappend="'badge-' + ${#strings.replace(#strings.toLowerCase(event.status.name()), '_', '-')}"
+                              th:text="${#strings.replace(event.status.name(), '_', ' ')}">STATUS</span>
+                    </div>
+                </div>
+                <div class="event-card-footer">
+                    <form th:action="@{'/events/' + ${event.id} + '/sponsor'}" method="post" class="sponsor-inline">
+                        <input type="number" name="amount" class="form-input" placeholder="Amount"
+                               min="1" step="0.01" required>
+                        <button type="submit" class="btn btn-sm btn-primary">Sponsor</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

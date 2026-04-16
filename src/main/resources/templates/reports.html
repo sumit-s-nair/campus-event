@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Reports - Campus Event Platform')}"></head>
+<body class="page-wrapper">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Platform Reports</h1>
+        <p>Comprehensive overview of events, users, participation, and sponsorship activity.</p>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="stats-grid">
+        <div class="stat-card stat-primary">
+            <div class="stat-label">Total Events</div>
+            <div class="stat-value" th:text="${totalEvents}">0</div>
+        </div>
+        <div class="stat-card stat-success">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" th:text="${totalUsers}">0</div>
+        </div>
+        <div class="stat-card stat-warning">
+            <div class="stat-label">Total Registrations</div>
+            <div class="stat-value" th:text="${totalParticipations}">0</div>
+        </div>
+        <div class="stat-card stat-danger">
+            <div class="stat-label">Total Sponsorship</div>
+            <div class="stat-value" th:text="'Rs. ' + ${#numbers.formatDecimal(totalSponsorshipAmount, 1, 2)}">Rs. 0.00</div>
+        </div>
+    </div>
+
+    <!-- Breakdowns -->
+    <div class="breakdown-grid">
+        <!-- Events by Status -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Events by Status</h2>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label"><span class="badge badge-draft">DRAFT</span></span>
+                <span class="breakdown-value" th:text="${draftCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label"><span class="badge badge-submitted">SUBMITTED</span></span>
+                <span class="breakdown-value" th:text="${submittedCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label"><span class="badge badge-faculty-approved">FACULTY APPROVED</span></span>
+                <span class="breakdown-value" th:text="${facultyApprovedCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label"><span class="badge badge-admin-approved">ADMIN APPROVED</span></span>
+                <span class="breakdown-value" th:text="${adminApprovedCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label"><span class="badge badge-published">PUBLISHED</span></span>
+                <span class="breakdown-value" th:text="${publishedCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label"><span class="badge badge-rejected">REJECTED</span></span>
+                <span class="breakdown-value" th:text="${rejectedCount}">0</span>
+            </div>
+        </div>
+
+        <!-- Users by Role -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Users by Role</h2>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label">Students</span>
+                <span class="breakdown-value" th:text="${studentCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label">Organizers</span>
+                <span class="breakdown-value" th:text="${organizerCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label">Faculty Advisors</span>
+                <span class="breakdown-value" th:text="${facultyCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label">Administrators</span>
+                <span class="breakdown-value" th:text="${adminCount}">0</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label">Sponsors</span>
+                <span class="breakdown-value" th:text="${sponsorCount}">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Events Table -->
+    <div class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2>All Events</h2>
+            </div>
+            <div th:if="${allEvents.isEmpty()}" class="empty-state" style="border: none; box-shadow: none;">
+                <p>No events in the system.</p>
+            </div>
+            <div th:if="${!allEvents.isEmpty()}" class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Organizer</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="event : ${allEvents}">
+                            <td th:text="${event.id}">1</td>
+                            <td>
+                                <a th:href="@{'/events/' + ${event.id} + '/detail'}"
+                                   th:text="${event.title}">Event</a>
+                            </td>
+                            <td th:text="${event.date}">2026-01-01</td>
+                            <td th:text="${event.organizer != null ? event.organizer.name : 'N/A'}">Organizer</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="'badge-' + ${#strings.replace(#strings.toLowerCase(event.status.name()), '_', '-')}"
+                                      th:text="${#strings.replace(event.status.name(), '_', ' ')}">STATUS</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sponsorships Table -->
+    <div class="section" th:if="${!allSponsorships.isEmpty()}">
+        <div class="card">
+            <div class="card-header">
+                <h2>All Sponsorships</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sponsor</th>
+                            <th>Event</th>
+                            <th class="text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="s : ${allSponsorships}">
+                            <td th:text="${s.sponsor.name}">Sponsor</td>
+                            <td th:text="${s.event.title}">Event</td>
+                            <td class="text-right" th:text="'Rs. ' + ${#numbers.formatDecimal(s.amount, 1, 2)}">Rs. 0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-2 mb-3">
+        <a th:href="@{/dashboard}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

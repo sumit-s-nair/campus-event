@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- ============ HEAD FRAGMENT ============ -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Campus Event Platform</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('click', async function (event) {
+                const button = event.target.closest('[data-event-status]');
+                if (!button) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const eventId = button.getAttribute('data-event-id');
+                const status = button.getAttribute('data-event-status');
+                const requestingUserId = button.getAttribute('data-requesting-user-id');
+                if (!eventId || !status || !requestingUserId) {
+                    return;
+                }
+
+                const originalText = button.textContent;
+                button.disabled = true;
+
+                try {
+                    const response = await fetch('/events/' + eventId + '/status', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            status: status,
+                            requestingUserId: Number(requestingUserId)
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Unable to update event status.');
+                    }
+
+                    window.location.reload();
+                } catch (error) {
+                    alert(error.message || 'Unable to update event status.');
+                } finally {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            });
+
+            const createEventForm = document.querySelector('[data-event-create-form]');
+            if (createEventForm) {
+                createEventForm.addEventListener('submit', async function (event) {
+                    event.preventDefault();
+
+                    const title = createEventForm.querySelector('[name="title"]').value;
+                    const description = createEventForm.querySelector('[name="description"]').value;
+                    const date = createEventForm.querySelector('[name="date"]').value;
+                    const organizerIdField = createEventForm.querySelector('[name="organizerId"]');
+                    const organizerId = organizerIdField ? Number(organizerIdField.value) : null;
+                    const submitButton = createEventForm.querySelector('button[type="submit"]');
+                    const originalText = submitButton ? submitButton.textContent : '';
+
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                    }
+
+                    try {
+                        const response = await fetch('/events', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                title: title,
+                                description: description,
+                                date: date,
+                                organizerId: organizerId
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Unable to create event.');
+                        }
+
+                        window.location.href = '/dashboard/organizer';
+                    } catch (error) {
+                        alert(error.message || 'Unable to create event.');
+                    } finally {
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.textContent = originalText;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+
+<body>
+
+<!-- ============ NAVBAR FRAGMENT ============ -->
+<nav th:fragment="navbar" class="navbar">
+    <a th:href="@{/dashboard}" class="navbar-brand">Smart Campus Event Platform</a>
+    <div class="navbar-right" th:if="${session.user != null}">
+        <ul class="navbar-nav">
+            <li><a th:href="@{/dashboard}">Dashboard</a></li>
+            <li th:if="${session.user.role.name() == 'ORGANIZER'}">
+                <a th:href="@{/events/new}">New Event</a>
+            </li>
+            <li th:if="${session.user.role.name() == 'ADMIN'}">
+                <a th:href="@{/reports}">Reports</a>
+            </li>
+        </ul>
+        <div class="navbar-divider"></div>
+        <div class="navbar-user">
+            <span class="user-name" th:text="${session.user.name}">User</span>
+            <span class="role-badge" th:text="${session.user.role}">ROLE</span>
+            <a th:href="@{/logout}" class="btn-logout">Sign Out</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ============ FOOTER FRAGMENT ============ -->
+<footer th:fragment="footer" class="footer">
+    Smart Campus Event &amp; Resource Coordination Platform
+</footer>
+
+</body>
+</html>

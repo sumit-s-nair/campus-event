@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Faculty Dashboard')}"></head>
+<body class="page-wrapper">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Faculty Dashboard</h1>
+        <p>Welcome, <span th:text="${session.user.name}">Faculty</span>. Review and approve submitted event proposals.</p>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Pending Approvals -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Pending Approvals</h2>
+        </div>
+
+        <div th:if="${pendingEvents.isEmpty()}" class="empty-state">
+            <p>No events are pending your approval at this time.</p>
+        </div>
+
+        <div th:if="${!pendingEvents.isEmpty()}" class="card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date</th>
+                            <th>Organizer</th>
+                            <th>Status</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="event : ${pendingEvents}">
+                            <td>
+                                <a th:href="@{'/events/' + ${event.id} + '/detail'}"
+                                   th:text="${event.title}">Event</a>
+                            </td>
+                            <td th:text="${event.date}">2026-01-01</td>
+                            <td th:text="${event.organizer != null ? event.organizer.name : 'N/A'}">Organizer</td>
+                            <td>
+                                <span class="badge badge-submitted">SUBMITTED</span>
+                            </td>
+                            <td class="text-right">
+                                <div class="flex gap-1" style="justify-content: flex-end;">
+                                    <form th:action="@{'/events/' + ${event.id} + '/faculty-approve'}" method="post" class="inline-form">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-success"
+                                                th:attr="data-event-id=${event.id},data-event-status='FACULTY_APPROVED',data-requesting-user-id=${session.user.id}">Approve</button>
+                                    </form>
+                                    <form th:action="@{'/events/' + ${event.id} + '/reject'}" method="post" class="inline-form">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-danger"
+                                                th:attr="data-event-id=${event.id},data-event-status='REJECTED',data-requesting-user-id=${session.user.id}">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Events Overview -->
+    <div class="section">
+        <div class="section-header">
+            <h2>All Events Overview</h2>
+        </div>
+
+        <div th:if="${allEvents.isEmpty()}" class="empty-state">
+            <p>No events in the system yet.</p>
+        </div>
+
+        <div th:if="${!allEvents.isEmpty()}" class="card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date</th>
+                            <th>Organizer</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="event : ${allEvents}">
+                            <td>
+                                <a th:href="@{'/events/' + ${event.id} + '/detail'}"
+                                   th:text="${event.title}">Event</a>
+                            </td>
+                            <td th:text="${event.date}">2026-01-01</td>
+                            <td th:text="${event.organizer != null ? event.organizer.name : 'N/A'}">Organizer</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="'badge-' + ${#strings.replace(#strings.toLowerCase(event.status.name()), '_', '-')}"
+                                      th:text="${#strings.replace(event.status.name(), '_', ' ')}">STATUS</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

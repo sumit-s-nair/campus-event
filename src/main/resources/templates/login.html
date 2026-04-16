@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign In - Campus Event Platform')}"></head>
+<body>
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="brand-section">
+            <div class="brand-name">Smart Campus Event Platform</div>
+            <div class="brand-tagline">Event &amp; Resource Coordination</div>
+        </div>
+
+        <h1>Sign In</h1>
+        <p class="subtitle">Access your campus event management dashboard</p>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input"
+                       placeholder="you@campus.edu" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input"
+                       placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Sign In</button>
+        </form>
+
+        <div class="auth-footer">
+            Don't have an account? <a th:href="@{/register}">Create one here</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
