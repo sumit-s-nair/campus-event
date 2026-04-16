@@ -1,5 +1,7 @@
 package com.example.campuseventplatform.controller;
 
+import com.example.campuseventplatform.dto.EventCreateDTO;
+import com.example.campuseventplatform.dto.StatusUpdateDTO;
 import com.example.campuseventplatform.model.*;
 import com.example.campuseventplatform.repository.*;
 import com.example.campuseventplatform.service.*;
@@ -237,14 +239,12 @@ public class WebController {
         if (user == null) return "redirect:/login";
         if (user.getRole() != Role.ORGANIZER) return "redirect:/dashboard";
 
-        User organizer = userRepository.findById(user.getId()).orElseThrow();
-
-        Event event = new Event();
-        event.setTitle(title);
-        event.setDescription(description);
-        event.setDate(LocalDate.parse(date));
-        event.setOrganizer(organizer);
-        eventService.createEvent(event);
+        EventCreateDTO eventDto = new EventCreateDTO();
+        eventDto.setTitle(title);
+        eventDto.setDescription(description);
+        eventDto.setDate(LocalDate.parse(date));
+        eventDto.setOrganizerId(user.getId());
+        eventService.createEvent(eventDto);
 
         ra.addFlashAttribute("success", "Event created successfully.");
         return "redirect:/dashboard/organizer";
@@ -283,7 +283,10 @@ public class WebController {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login";
 
-        eventService.submitEvent(id);
+        StatusUpdateDTO statusUpdate = new StatusUpdateDTO();
+        statusUpdate.setStatus(EventStatus.SUBMITTED);
+        statusUpdate.setRequestingUserId(user.getId());
+        eventService.updateEventStatus(id, statusUpdate);
         ra.addFlashAttribute("success", "Event submitted for approval.");
         return "redirect:/dashboard/organizer";
     }
@@ -294,7 +297,10 @@ public class WebController {
         if (user == null) return "redirect:/login";
         if (user.getRole() != Role.FACULTY) return "redirect:/dashboard";
 
-        eventService.facultyApprove(id);
+        StatusUpdateDTO statusUpdate = new StatusUpdateDTO();
+        statusUpdate.setStatus(EventStatus.FACULTY_APPROVED);
+        statusUpdate.setRequestingUserId(user.getId());
+        eventService.updateEventStatus(id, statusUpdate);
         ra.addFlashAttribute("success", "Event approved by faculty.");
         return "redirect:/dashboard/faculty";
     }
@@ -305,7 +311,10 @@ public class WebController {
         if (user == null) return "redirect:/login";
         if (user.getRole() != Role.ADMIN) return "redirect:/dashboard";
 
-        eventService.adminApprove(id);
+        StatusUpdateDTO statusUpdate = new StatusUpdateDTO();
+        statusUpdate.setStatus(EventStatus.ADMIN_APPROVED);
+        statusUpdate.setRequestingUserId(user.getId());
+        eventService.updateEventStatus(id, statusUpdate);
         ra.addFlashAttribute("success", "Event approved by admin.");
         return "redirect:/dashboard/admin";
     }
@@ -316,7 +325,10 @@ public class WebController {
         if (user == null) return "redirect:/login";
         if (user.getRole() != Role.ADMIN) return "redirect:/dashboard";
 
-        eventService.publishEvent(id);
+        StatusUpdateDTO statusUpdate = new StatusUpdateDTO();
+        statusUpdate.setStatus(EventStatus.PUBLISHED);
+        statusUpdate.setRequestingUserId(user.getId());
+        eventService.updateEventStatus(id, statusUpdate);
         ra.addFlashAttribute("success", "Event published successfully.");
         return "redirect:/dashboard/admin";
     }
@@ -326,11 +338,10 @@ public class WebController {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login";
 
-        Event event = eventRepository.findById(id).orElse(null);
-        if (event != null) {
-            event.setStatus(EventStatus.REJECTED);
-            eventRepository.save(event);
-        }
+        StatusUpdateDTO statusUpdate = new StatusUpdateDTO();
+        statusUpdate.setStatus(EventStatus.REJECTED);
+        statusUpdate.setRequestingUserId(user.getId());
+        eventService.updateEventStatus(id, statusUpdate);
 
         ra.addFlashAttribute("success", "Event rejected.");
         return "redirect:/dashboard";
@@ -370,10 +381,7 @@ public class WebController {
         User sponsor = userRepository.findById(user.getId()).orElseThrow();
 
         if (event != null) {
-            Sponsorship sponsorship = new Sponsorship();
-            sponsorship.setSponsor(sponsor);
-            sponsorship.setEvent(event);
-            sponsorship.setAmount(amount);
+            Sponsorship sponsorship = event.createSponsorship(sponsor, amount);
             sponsorshipService.sponsorEvent(sponsorship);
             ra.addFlashAttribute("success", "Sponsorship added successfully.");
         }

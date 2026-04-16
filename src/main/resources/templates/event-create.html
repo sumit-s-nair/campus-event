@@ -13,7 +13,8 @@
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
     <div class="card" style="max-width: 640px;">
-        <form th:action="@{/events/new}" method="post">
+        <form th:action="@{/events/new}" method="post" data-event-create-form>
+            <input type="hidden" name="organizerId" th:value="${session.user.id}">
             <div class="form-group">
                 <label class="form-label" for="title">Event Title</label>
                 <input type="text" id="title" name="title" class="form-input"

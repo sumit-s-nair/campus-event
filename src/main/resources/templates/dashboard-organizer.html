@@ -44,7 +44,9 @@
                        class="btn btn-sm btn-secondary">View</a>
                     <form th:if="${event.status.name() == 'DRAFT'}"
                           th:action="@{'/events/' + ${event.id} + '/submit'}" method="post" class="inline-form">
-                        <button type="submit" class="btn btn-sm btn-primary">Submit for Approval</button>
+                        <button type="submit"
+                                class="btn btn-sm btn-primary"
+                                th:attr="data-event-id=${event.id},data-event-status='SUBMITTED',data-requesting-user-id=${session.user.id}">Submit for Approval</button>
                     </form>
                 </div>
             </div>

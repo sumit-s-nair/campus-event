@@ -92,17 +92,10 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void saveParticipation(User student, Event event) {
-        Participation p = new Participation();
-        p.setStudent(student);
-        p.setEvent(event);
-        participationRepository.save(p);
+        participationRepository.save(event.createParticipation(student));
     }
 
     private void saveSponsorship(User sponsor, Event event, Double amount) {
-        Sponsorship s = new Sponsorship();
-        s.setSponsor(sponsor);
-        s.setEvent(event);
-        s.setAmount(amount);
-        sponsorshipRepository.save(s);
+        sponsorshipRepository.save(event.createSponsorship(sponsor, amount));
     }
 }

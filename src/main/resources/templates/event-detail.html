@@ -48,32 +48,44 @@
         <!-- Organizer: Submit Draft -->
         <th:block th:if="${session.user.role.name() == 'ORGANIZER' and event.status.name() == 'DRAFT'}">
             <form th:action="@{'/events/' + ${event.id} + '/submit'}" method="post" class="inline-form">
-                <button type="submit" class="btn btn-primary">Submit for Approval</button>
+                <button type="submit"
+                        class="btn btn-primary"
+                    th:attr="data-event-id=${event.id},data-event-status='SUBMITTED',data-requesting-user-id=${session.user.id}">Submit for Approval</button>
             </form>
         </th:block>
 
         <!-- Faculty: Approve / Reject -->
         <th:block th:if="${session.user.role.name() == 'FACULTY' and event.status.name() == 'SUBMITTED'}">
             <form th:action="@{'/events/' + ${event.id} + '/faculty-approve'}" method="post" class="inline-form">
-                <button type="submit" class="btn btn-success">Approve</button>
+                <button type="submit"
+                        class="btn btn-success"
+                    th:attr="data-event-id=${event.id},data-event-status='FACULTY_APPROVED',data-requesting-user-id=${session.user.id}">Approve</button>
             </form>
             <form th:action="@{'/events/' + ${event.id} + '/reject'}" method="post" class="inline-form">
-                <button type="submit" class="btn btn-danger">Reject</button>
+                <button type="submit"
+                        class="btn btn-danger"
+                    th:attr="data-event-id=${event.id},data-event-status='REJECTED',data-requesting-user-id=${session.user.id}">Reject</button>
             </form>
         </th:block>
 
         <!-- Admin: Approve / Publish / Reject -->
         <th:block th:if="${session.user.role.name() == 'ADMIN' and event.status.name() == 'FACULTY_APPROVED'}">
             <form th:action="@{'/events/' + ${event.id} + '/admin-approve'}" method="post" class="inline-form">
-                <button type="submit" class="btn btn-success">Admin Approve</button>
+                <button type="submit"
+                        class="btn btn-success"
+                        th:attr="data-event-id=${event.id},data-event-status='ADMIN_APPROVED',data-requesting-user-id=${session.user.id}">Admin Approve</button>
             </form>
             <form th:action="@{'/events/' + ${event.id} + '/reject'}" method="post" class="inline-form">
-                <button type="submit" class="btn btn-danger">Reject</button>
+                <button type="submit"
+                        class="btn btn-danger"
+                        th:attr="data-event-id=${event.id},data-event-status='REJECTED',data-requesting-user-id=${session.user.id}">Reject</button>
             </form>
         </th:block>
         <th:block th:if="${session.user.role.name() == 'ADMIN' and event.status.name() == 'ADMIN_APPROVED'}">
             <form th:action="@{'/events/' + ${event.id} + '/publish'}" method="post" class="inline-form">
-                <button type="submit" class="btn btn-primary">Publish Event</button>
+                <button type="submit"
+                        class="btn btn-primary"
+                        th:attr="data-event-id=${event.id},data-event-status='PUBLISHED',data-requesting-user-id=${session.user.id}">Publish Event</button>
             </form>
         </th:block>
 

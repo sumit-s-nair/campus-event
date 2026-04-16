@@ -30,9 +30,7 @@ public class ParticipationService {
         User student = userRepository.findById(studentId).orElseThrow();
         Event event = eventRepository.findById(eventId).orElseThrow();
 
-        Participation participation = new Participation();
-        participation.setStudent(student);
-        participation.setEvent(event);
+        Participation participation = event.createParticipation(student);
 
         return participationRepository.save(participation);
     }

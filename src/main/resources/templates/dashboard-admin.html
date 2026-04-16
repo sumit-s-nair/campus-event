@@ -66,13 +66,19 @@
                             <td class="text-right">
                                 <div class="flex gap-1" style="justify-content: flex-end;">
                                     <form th:action="@{'/events/' + ${event.id} + '/admin-approve'}" method="post" class="inline-form">
-                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                        <button type="submit"
+                                                class="btn btn-sm btn-success"
+                                                th:attr="data-event-id=${event.id},data-event-status='ADMIN_APPROVED',data-requesting-user-id=${session.user.id}">Approve</button>
                                     </form>
                                     <form th:action="@{'/events/' + ${event.id} + '/publish'}" method="post" class="inline-form">
-                                        <button type="submit" class="btn btn-sm btn-primary">Publish</button>
+                                        <button type="submit"
+                                                class="btn btn-sm btn-primary"
+                                                th:attr="data-event-id=${event.id},data-event-status='PUBLISHED',data-requesting-user-id=${session.user.id}">Publish</button>
                                     </form>
                                     <form th:action="@{'/events/' + ${event.id} + '/reject'}" method="post" class="inline-form">
-                                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                        <button type="submit"
+                                                class="btn btn-sm btn-danger"
+                                                th:attr="data-event-id=${event.id},data-event-status='REJECTED',data-requesting-user-id=${session.user.id}">Reject</button>
                                     </form>
                                 </div>
                             </td>
